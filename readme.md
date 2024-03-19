@@ -1,6 +1,7 @@
 # Galactic Unicorn Clock with Weather Display and Web-based Configuration
 
 This project is a clock and weather display for the Pimoroni Galactic Unicorn, a 53x11 RGB LED display matrix with a Raspberry Pi Pico W. The clock synchronizes time using NTP and displays the current time and temperature on the LED matrix. The temperature data is fetched from the Weather Underground API.
+https://github.com/gbgbgb8/galactic_unicorn_time_temp/blob/main/IMG_3642.jpeg
 
 The project also includes a web-based configuration interface that allows users to update the Wi-Fi credentials and Weather Underground API settings without modifying the code directly. The web server is initiated by pressing the A button on the Galactic Unicorn, and the device's IP address is displayed on the LED matrix for easy access.
 

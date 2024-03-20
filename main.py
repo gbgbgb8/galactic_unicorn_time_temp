@@ -144,6 +144,7 @@ def redraw_display_if_reqd():
         graphics.text(clock, x, y, -1, 1)
 
         temperature = get_temperature()
+        graphics.set_pen(WHITE)
         temp_x = width - graphics.measure_text(temperature, 1) - 1
         temp_y = height - 9
         graphics.text(temperature, temp_x, temp_y, -1, 1)

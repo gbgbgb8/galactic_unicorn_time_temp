@@ -139,15 +139,15 @@ def redraw_display_if_reqd():
 
         clock = f"{hour}:{minute:02}"
         graphics.set_pen(RED)
-        x = 2
-        y = 2
+        x = 17
+        y = 0
         graphics.text(clock, x, y, -1, 1)
 
         temperature = get_temperature()
         graphics.set_pen(WHITE)
-        temp_x = width - graphics.measure_text(temperature, 1) - 1
-        temp_y = height - 9
-        graphics.text(temperature, temp_x, temp_y, -1, 1)
+        temp_x = 1
+        temp_y = 18
+        graphics.text(temperature, temp_x, temp_y, -1, 2)
 
         last_second = second
 

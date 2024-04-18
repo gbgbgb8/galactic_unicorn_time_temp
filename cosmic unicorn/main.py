@@ -39,7 +39,7 @@ def sync_time():
         wlan.active(True)
         wlan.config(pm=0xa11140)
         wlan.connect(WIFI_SSID, WIFI_PASSWORD)
-        max_wait = 100
+        max_wait = 200
         while max_wait > 0:
             if wlan.status() < 0 or wlan.status() >= 3:
                 break
@@ -53,7 +53,9 @@ def sync_time():
             print("utc offset:", utc_offset)
         else:
             print("Connection failed")
-            return
+            display_no_wifi()
+            time.sleep(10)
+            machine.reset()
     try:
         update_utc_offset_from_worldtimeapi()
         print("utc offset:", utc_offset)
@@ -61,6 +63,13 @@ def sync_time():
         print("Time set")
     except Exception as e:
         print("Failed to set time:", str(e))
+
+def display_no_wifi():
+    graphics.set_pen(BLACK)
+    graphics.clear()
+    graphics.set_pen(RED)
+    graphics.text("NO WIFI", 6, 12, -1, 2)
+    cu.update(graphics)
 
 up_button = machine.Pin(CosmicUnicorn.SWITCH_VOLUME_UP, machine.Pin.IN, machine.Pin.PULL_UP)
 down_button = machine.Pin(CosmicUnicorn.SWITCH_VOLUME_DOWN, machine.Pin.IN, machine.Pin.PULL_UP)
@@ -139,7 +148,7 @@ def redraw_display_if_reqd():
 
         clock = f"{hour}:{minute:02}"
         graphics.set_pen(RED)
-        x = 17
+        x = 16
         y = 0
         graphics.text(clock, x, y, -1, 1)
 

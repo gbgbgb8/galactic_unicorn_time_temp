@@ -132,7 +132,7 @@ def get_temperature(force_update=False):
         return last_temperature
 
 def redraw_display_if_reqd():
-    global year, month, day, wd, hour, minute, second, last_second, last_temperature_update
+    global year, month, day, wd, hour, minute, second, last_second, last_temperature_update, clock_x, clock_direction, last_minute
 
     year, month, day, wd, hour, minute, second, _ = rtc.datetime()
     if second != last_second:
@@ -148,7 +148,7 @@ def redraw_display_if_reqd():
 
         clock = f"{hour}:{minute:02}"
         graphics.set_pen(RED)
-        x = 16
+        x = clock_x
         y = 0
         graphics.text(clock, x, y, -1, 1)
 
@@ -159,6 +159,24 @@ def redraw_display_if_reqd():
         graphics.text(temperature, temp_x, temp_y, -1, 2)
 
         last_second = second
+
+        if minute != last_minute:
+            if clock_direction == "left":
+                clock_x -= 1
+                if clock_x <= 6:
+                    clock_direction = "right"
+            else:
+                clock_x += 1
+                if clock_x >= 16:
+                    clock_direction = "left"
+            last_minute = minute
+
+# Initialize clock position, direction, and last minute
+clock_x = 16
+clock_direction = "left"
+_, _, _, _, _, last_minute, _, _ = rtc.datetime()
+
+# Rest of the code remains the same
 
 def start_web_server():
     global wlan

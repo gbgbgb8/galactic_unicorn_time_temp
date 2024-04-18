@@ -7,6 +7,7 @@ import urequests as requests
 import ujson as json
 from cosmic import CosmicUnicorn
 from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
+from colors import *  # Import color variables from colors.py
 
 try:
     from secrets import WIFI_SSID, WIFI_PASSWORD, WUNDERGROUNDAPIKEY, WUNDERGROUNDSTATION
@@ -21,10 +22,6 @@ rtc = machine.RTC()
 
 width = CosmicUnicorn.WIDTH
 height = CosmicUnicorn.HEIGHT
-
-WHITE = graphics.create_pen(255, 255, 255)
-BLACK = graphics.create_pen(0, 0, 0)
-RED = graphics.create_pen(255, 0, 0)
 
 last_temperature_update = 0
 last_temperature = "N/A°"
@@ -171,7 +168,7 @@ def redraw_display_if_reqd():
             
             if temp_direction == "up":
                 temp_y -= 1
-                if temp_y <= 8:
+                if temp_y <= 10:
                     temp_direction = "down"
             else:
                 temp_y += 1
@@ -183,7 +180,7 @@ def redraw_display_if_reqd():
 # Initialize clock position, direction, and last minute
 clock_x = 16
 clock_direction = "left"
-temp_y = 8
+temp_y = 10
 temp_direction = "up"
 _, _, _, _, _, last_minute, _, _ = rtc.datetime()
 
@@ -259,8 +256,20 @@ def display_ip_address(ip):
     graphics.set_pen(BLACK)
     graphics.clear()
     graphics.set_pen(RED)
-    graphics.text(f"{ip}", 0, 2, -1, 1)
-    cu.update(graphics)
+
+    ip_text = f"{ip}  "  # Add some spaces after the IP address
+    scroll_width = graphics.measure_text(ip_text, 1)
+    scroll_delay = 0.1  # Delay between each scroll step (adjust as needed)
+
+    for i in range(scroll_width + width):
+        graphics.set_pen(BLACK)
+        graphics.clear()
+        graphics.set_pen(RED)
+        graphics.text(ip_text, -i, 2, -1, 1)
+        cu.update(graphics)
+        time.sleep(scroll_delay)
+
+    time.sleep(1)  # Pause before repeating the scroll
 
 graphics.set_font("bitmap8")
 cu.set_brightness(1.0)
@@ -286,3 +295,4 @@ while True:
     redraw_display_if_reqd()
     cu.update(graphics)
     time.sleep(0.01)
+

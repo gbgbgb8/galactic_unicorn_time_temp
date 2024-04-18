@@ -132,7 +132,7 @@ def get_temperature(force_update=False):
         return last_temperature
 
 def redraw_display_if_reqd():
-    global year, month, day, wd, hour, minute, second, last_second, last_temperature_update, clock_x, clock_direction, last_minute
+    global year, month, day, wd, hour, minute, second, last_second, last_temperature_update, clock_x, clock_direction, last_minute, temp_y, temp_direction
 
     year, month, day, wd, hour, minute, second, _ = rtc.datetime()
     if second != last_second:
@@ -155,7 +155,6 @@ def redraw_display_if_reqd():
         temperature = get_temperature()
         graphics.set_pen(WHITE)
         temp_x = 1
-        temp_y = 18
         graphics.text(temperature, temp_x, temp_y, -1, 2)
 
         last_second = second
@@ -169,11 +168,23 @@ def redraw_display_if_reqd():
                 clock_x += 1
                 if clock_x >= 16:
                     clock_direction = "left"
+            
+            if temp_direction == "up":
+                temp_y -= 1
+                if temp_y <= 8:
+                    temp_direction = "down"
+            else:
+                temp_y += 1
+                if temp_y >= 18:
+                    temp_direction = "up"
+            
             last_minute = minute
 
 # Initialize clock position, direction, and last minute
 clock_x = 16
 clock_direction = "left"
+temp_y = 8
+temp_direction = "up"
 _, _, _, _, _, last_minute, _, _ = rtc.datetime()
 
 # Rest of the code remains the same

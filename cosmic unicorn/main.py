@@ -8,6 +8,7 @@ import ujson as json
 from cosmic import CosmicUnicorn
 from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 from colors import *  # Import color variables from colors.py
+from twinkle import Twinkle
 
 try:
     from secrets import WIFI_SSID, WIFI_PASSWORD, WUNDERGROUNDAPIKEY, WUNDERGROUNDSTATION
@@ -292,7 +293,9 @@ while True:
         get_temperature(force_update=True)
         last_second = None
 
+    # Twinkle.update(graphics)
     redraw_display_if_reqd()
     cu.update(graphics)
     time.sleep(0.01)
+
 

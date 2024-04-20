@@ -27,6 +27,8 @@ last_temperature_update = 0
 last_temperature = "N/A°"
 utc_offset = -8
 
+twinkle_enabled = False
+
 def sync_time():
     global wlan
     if not wifi_available:
@@ -294,7 +296,14 @@ while True:
         get_temperature(force_update=True)
         last_second = None
 
-    twinkle.update(graphics)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_C):
+        twinkle_enabled = not twinkle_enabled
+        last_second = None
+        time.sleep(0.2)  # Debounce delay to avoid multiple toggles
+
+    if twinkle_enabled:
+        twinkle.update(graphics)
+
     redraw_display_if_reqd()
     cu.update(graphics)
     time.sleep(0.01)

@@ -7,7 +7,7 @@ import urequests as requests
 import ujson as json
 from cosmic import CosmicUnicorn
 from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
-from colors import *  # Import color variables from colors.py
+from colors import colors, graphics
 from twinkle import Twinkle
 
 try:
@@ -18,7 +18,6 @@ except ImportError:
     wifi_available = False
 
 cu = CosmicUnicorn()
-graphics = PicoGraphics(DISPLAY)
 rtc = machine.RTC()
 
 width = CosmicUnicorn.WIDTH
@@ -63,9 +62,9 @@ def sync_time():
         print("Failed to set time:", str(e))
 
 def display_no_wifi():
-    graphics.set_pen(BLACK)
+    graphics.set_pen(graphics.create_pen(*colors['BLACK']))
     graphics.clear()
-    graphics.set_pen(RED)
+    graphics.set_pen(graphics.create_pen(*colors['RED']))
     graphics.text("NO WIFI", 6, 12, -1, 2)
     cu.update(graphics)
 
@@ -141,17 +140,17 @@ def redraw_display_if_reqd():
         elif hour > 12:
             hour -= 12
 
-        graphics.set_pen(BLACK)
+        graphics.set_pen(graphics.create_pen(*colors['BLACK']))
         graphics.clear()
 
         clock = f"{hour}:{minute:02}"
-        graphics.set_pen(RED)
+        graphics.set_pen(graphics.create_pen(*colors['RED']))
         x = clock_x
         y = 0
         graphics.text(clock, x, y, -1, 1)
 
         temperature = get_temperature()
-        graphics.set_pen(WHITE)
+        graphics.set_pen(graphics.create_pen(*colors['WHITE']))
         temp_x = 1
         graphics.text(temperature, temp_x, temp_y, -1, 2)
 
@@ -254,18 +253,18 @@ def update_secrets(data):
         f.write(f"WUNDERGROUNDSTATION = '{params['station_id']}'\n")
 
 def display_ip_address(ip):
-    graphics.set_pen(BLACK)
+    graphics.set_pen(graphics.create_pen(*colors['BLACK']))
     graphics.clear()
-    graphics.set_pen(RED)
+    graphics.set_pen(graphics.create_pen(*colors['RED']))
 
     ip_text = f"{ip}  "  # Add some spaces after the IP address
     scroll_width = graphics.measure_text(ip_text, 1)
     scroll_delay = 0.1  # Delay between each scroll step (adjust as needed)
 
     for i in range(scroll_width + width):
-        graphics.set_pen(BLACK)
+        graphics.set_pen(graphics.create_pen(*colors['BLACK']))
         graphics.clear()
-        graphics.set_pen(RED)
+        graphics.set_pen(graphics.create_pen(*colors['RED']))
         graphics.text(ip_text, -i, 2, -1, 1)
         cu.update(graphics)
         time.sleep(scroll_delay)
@@ -274,6 +273,8 @@ def display_ip_address(ip):
 
 graphics.set_font("bitmap8")
 cu.set_brightness(1.0)
+
+twinkle = Twinkle(width, height)
 
 sync_time()
 
@@ -293,9 +294,7 @@ while True:
         get_temperature(force_update=True)
         last_second = None
 
-    # Twinkle.update(graphics)
+    twinkle.update(graphics)
     redraw_display_if_reqd()
     cu.update(graphics)
     time.sleep(0.01)
-
-

@@ -1,8 +1,8 @@
 import random
-from colors import *  # Import color variables from colors.py
+from colors import colors  # Import the colors dictionary from colors.py
 
 class Twinkle:
-    def __init__(self, width, height, num_pixels=10):
+    def __init__(self, width, height, num_pixels=5):
         self.width = width
         self.height = height
         self.num_pixels = num_pixels
@@ -26,7 +26,7 @@ class Twinkle:
             graphics.pixel(x, y)
 
             # Update the step and reset if necessary
-            self.steps[i] = (step + 1) % 10
+            self.steps[i] = (step + 1) % 20
             if self.steps[i] == 0:
                 self.pixels[i] = (random.randint(0, self.width - 1), random.randint(0, self.height - 1))
                 self.colors[i] = random.choice(list(colors.keys()))

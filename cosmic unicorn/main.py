@@ -12,7 +12,7 @@ from twinkle import Twinkle
 from webserver import start_web_server
 
 try:
-    from secrets import WIFI_SSID, WIFI_PASSWORD, WUNDERGROUNDAPIKEY, WUNDERGROUNDSTATION
+    from secrets import WIFI_SSID, WIFI_PASSWORD, WUNDERGROUNDAPIKEY, WUNDERGROUNDSTATION, TIMEZONEOFFSET
     wifi_available = True
 except ImportError:
     print("Create secrets.py with your WiFi credentials to get time from NTP")
@@ -93,7 +93,7 @@ last_second = second
 
 def update_utc_offset_from_worldtimeapi():
     global utc_offset
-    url = "http://worldtimeapi.org/api/ip"
+    url = TIMEZONEOFFSET
     try:
         response = requests.get(url)
         if response.status_code == 200:

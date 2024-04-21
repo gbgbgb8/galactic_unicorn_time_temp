@@ -44,6 +44,13 @@ def start_web_server(wlan, cu):
                 cl.close()
                 s.close()
                 machine.reset()
+            elif b'GET /reboot' in request:
+                response = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n'
+                response += 'Rebooting device...'
+                cl.send(response)
+                cl.close()
+                s.close()
+                machine.reset()
             else:
                 response = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n'
                 response += '<html><body>'
@@ -52,9 +59,11 @@ def start_web_server(wlan, cu):
                 response += 'WIFI_PASSWORD: <input type="password" name="wifi_password"><br>'
                 response += 'WUNDERGROUNDAPIKEY: <input type="text" name="api_key"><br>'
                 response += 'WUNDERGROUNDSTATION: <input type="text" name="station_id"><br>'
-                response += '<input type="submit" value="Update">'
+                response += 'TIMEZONEOFFSET: <input type="text" name="timezone_offset"><br>'
+                response += '<input type="submit" value="Update and Reboot">'
                 response += '</form>'
                 response += '<br><a href="/secrets.py">Download secrets.py</a>'
+                response += '<br><br><form action="/reboot" method="get"><input type="submit" value="Cancel and Reboot"></form>'
                 response += '</body></html>'
                 cl.send(response)
                 cl.close()
@@ -73,19 +82,16 @@ def update_secrets(data):
         f.write(f"WIFI_PASSWORD = '{params['wifi_password']}'\n")
         f.write(f"WUNDERGROUNDAPIKEY = '{params['api_key']}'\n")
         f.write(f"WUNDERGROUNDSTATION = '{params['station_id']}'\n")
+        f.write(f"TIMEZONEOFFSET = '{params['timezone_offset']}'\n")
 
 def display_ip_address(ip, cu):
-    ip_text = f"{str(ip)} "  # Convert ip to string and add more spaces after the IP address
-    scroll_width = graphics.measure_text(ip_text, 1)
-    scroll_delay = 0.1  # Delay between each scroll step (adjust as needed)
+    ip_parts = ip.split('.')
+    graphics.set_pen(graphics.create_pen(*colors['BLACK']))
+    graphics.clear()
+    graphics.set_pen(graphics.create_pen(*colors['RED']))
 
-    while True:
-        for i in range(scroll_width + CosmicUnicorn.WIDTH):
-            graphics.set_pen(graphics.create_pen(*colors['BLACK']))
-            graphics.clear()
-            graphics.set_pen(graphics.create_pen(*colors['RED']))
-            graphics.text(ip_text, -i, 2, -1, 1)
-            cu.update(graphics)
-            time.sleep(scroll_delay)
+    for i, part in enumerate(ip_parts):
+        graphics.text(part, 0, i * 8, -1, 1)
 
-    time.sleep(1)  # Pause before repeating the scroll
+    cu.update(graphics)
+    time.sleep(5)  # Display the IP address for 5 seconds

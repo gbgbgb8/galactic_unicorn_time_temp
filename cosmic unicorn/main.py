@@ -9,6 +9,7 @@ from cosmic import CosmicUnicorn
 from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 from colors import colors, graphics
 from twinkle import Twinkle
+from webserver import start_web_server
 
 try:
     from secrets import WIFI_SSID, WIFI_PASSWORD, WUNDERGROUNDAPIKEY, WUNDERGROUNDSTATION
@@ -28,6 +29,8 @@ last_temperature = "N/A°"
 utc_offset = -8
 
 twinkle_enabled = False
+
+wlan = None
 
 def sync_time():
     global wlan
@@ -90,7 +93,7 @@ last_second = second
 
 def update_utc_offset_from_worldtimeapi():
     global utc_offset
-    url = "http://worldtimeapi.org/api/timezone/America/Los_Angeles"
+    url = "http://worldtimeapi.org/api/ip"
     try:
         response = requests.get(url)
         if response.status_code == 200:
@@ -167,7 +170,7 @@ def redraw_display_if_reqd():
                 clock_x += 1
                 if clock_x >= 16:
                     clock_direction = "left"
-            
+
             if temp_direction == "up":
                 temp_y -= 1
                 if temp_y <= 10:
@@ -176,102 +179,15 @@ def redraw_display_if_reqd():
                 temp_y += 1
                 if temp_y >= 18:
                     temp_direction = "up"
-            
+
             last_minute = minute
 
 # Initialize clock position, direction, and last minute
-clock_x = 16
+clock_x = 12
 clock_direction = "left"
 temp_y = 10
 temp_direction = "up"
 _, _, _, _, _, last_minute, _, _ = rtc.datetime()
-
-# Rest of the code remains the same
-
-def start_web_server():
-    global wlan
-    import socket
-    addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
-    s = socket.socket()
-    s.bind(addr)
-    s.listen(1)
-    print('Listening on', addr)
-    ip = wlan.ifconfig()[0]
-    display_ip_address(ip)
-
-    while True:
-        try:
-            cl, addr = s.accept()
-            print('Client connected from', addr)
-            request = cl.recv(1024)
-            print(request)
-
-            if b'GET /secrets.py' in request:
-                with open('secrets.py', 'r') as f:
-                    secrets_content = f.read()
-                response = 'HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment; filename=secrets.py\r\n\r\n'
-                response += secrets_content
-                cl.send(response)
-                cl.close()
-            elif b'POST' in request:
-                content_length = int(request.split(b'Content-Length: ')[1].split(b'\r\n')[0])
-                data = request.split(b'\r\n\r\n')[1][:content_length].decode('utf-8')
-                print("Received data:", data)
-                update_secrets(data)
-                response = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n'
-                response += 'Settings updated successfully. Restarting device...'
-                cl.send(response)
-                cl.close()
-                s.close()
-                machine.reset()
-            else:
-                response = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n'
-                response += '<html><body>'
-                response += '<form method="post">'
-                response += 'WIFI_SSID: <input type="text" name="wifi_ssid"><br>'
-                response += 'WIFI_PASSWORD: <input type="password" name="wifi_password"><br>'
-                response += 'WUNDERGROUNDAPIKEY: <input type="text" name="api_key"><br>'
-                response += 'WUNDERGROUNDSTATION: <input type="text" name="station_id"><br>'
-                response += '<input type="submit" value="Update">'
-                response += '</form>'
-                response += '<br><a href="/secrets.py">Download secrets.py</a>'
-                response += '</body></html>'
-                cl.send(response)
-                cl.close()
-        except OSError as e:
-            cl.close()
-            print('Connection closed')
-
-def update_secrets(data):
-    params = {}
-    for param in data.split('&'):
-        key, value = param.split('=')
-        params[key] = value
-
-    with open('secrets.py', 'w') as f:
-        f.write(f"WIFI_SSID = '{params['wifi_ssid']}'\n")
-        f.write(f"WIFI_PASSWORD = '{params['wifi_password']}'\n")
-        f.write(f"WUNDERGROUNDAPIKEY = '{params['api_key']}'\n")
-        f.write(f"WUNDERGROUNDSTATION = '{params['station_id']}'\n")
-
-def display_ip_address(ip):
-    graphics.set_pen(graphics.create_pen(*colors['BLACK']))
-    graphics.clear()
-    graphics.set_pen(graphics.create_pen(*colors['RED']))
-
-    ip_text = f"{ip}  "  # Add some spaces after the IP address
-    scroll_width = graphics.measure_text(ip_text, 1)
-    scroll_delay = 0.1  # Delay between each scroll step (adjust as needed)
-
-    for i in range(scroll_width + width):
-        graphics.set_pen(graphics.create_pen(*colors['BLACK']))
-        graphics.clear()
-        graphics.set_pen(graphics.create_pen(*colors['RED']))
-        graphics.text(ip_text, -i, 2, -1, 1)
-        cu.update(graphics)
-        time.sleep(scroll_delay)
-
-    time.sleep(1)  # Pause before repeating the scroll
 
 graphics.set_font("bitmap8")
 cu.set_brightness(1.0)
@@ -290,7 +206,7 @@ while True:
         last_second = None
 
     if cu.is_pressed(CosmicUnicorn.SWITCH_A):
-        start_web_server()
+        start_web_server(wlan, cu)
 
     if cu.is_pressed(CosmicUnicorn.SWITCH_B):
         get_temperature(force_update=True)

@@ -30,3 +30,4 @@ class Twinkle:
             if self.steps[i] == 0:
                 self.pixels[i] = (random.randint(0, self.width - 1), random.randint(0, self.height - 1))
                 self.colors[i] = random.choice(list(colors.keys()))
+

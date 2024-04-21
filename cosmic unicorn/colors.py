@@ -67,3 +67,4 @@ colors = {
     'DEEPPINK': (255, 20, 147),
     'ORANGERED': (255, 69, 0)
 }
+
